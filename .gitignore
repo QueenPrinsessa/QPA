@@ -9,6 +9,11 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.sln
+
+#Automatically generated files
+*.vcxproj
+*.vcxproj.user
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -21,8 +26,6 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-x64/
-x86/
 [Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
@@ -31,6 +34,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+[Tt]emp/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
