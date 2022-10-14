@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <utility>
 #include <iterator>
 #include <cstddef>
@@ -8,6 +9,8 @@ namespace QPA
 	template <typename T>
 	class LinkedList
 	{
+		using Ref = T&;
+		using ConstRef = const T&;
 		struct Node
 		{
 			friend class LinkedList<T>;
@@ -18,7 +21,7 @@ namespace QPA
 			Node() = delete;
 
 			private:
-				Node(const T& aData, Node* aNext)
+				Node(ConstRef aData, Node* aNext)
 					: Data(aData), myNext(aNext) {}
 				Node* myNext { nullptr };
 		};
@@ -50,12 +53,20 @@ namespace QPA
 			LinkedList(std::initializer_list<T> aList);
 			~LinkedList();
 
+			Ref Front();
+			ConstRef Front() const;
+
 			void PushFront(const T& aData);
+			void PopFront();
 
 			template<typename ... TArgs>
 			void EmplaceFront(TArgs&&... aArgs);
 
-			void Clear();
+			void Clear() noexcept;
+			bool Empty() const;
+
+			void Swap(LinkedList<T>& aOther) noexcept;
+			void Reverse() noexcept;
 
 			Iterator begin() { return Iterator { myHead }; }
 			Iterator end() { return Iterator { nullptr }; }
@@ -79,6 +90,19 @@ namespace QPA
 	}
 
 	template <typename T>
+	T& LinkedList<T>::Front()
+	{
+		assert(myHead && "Accessing nullptr element");
+		return myHead->Data;
+	}
+
+	template <typename T>
+	const T& LinkedList<T>::Front() const
+	{
+		return Front();
+	}
+
+	template <typename T>
 	void LinkedList<T>::PushFront(const T& aData)
 	{
 		Node* node = new Node { aData, myHead };
@@ -86,16 +110,26 @@ namespace QPA
 	}
 
 	template <typename T>
+	void LinkedList<T>::PopFront()
+	{
+		if(myHead)
+		{
+			Node* next = myHead->myNext;
+			delete myHead;
+			myHead = next;
+		}
+	}
+
+	template <typename T>
 	template <typename ... TArgs>
 	void LinkedList<T>::EmplaceFront(TArgs&&... aArgs)
 	{
-		Node* node = new Node { T{ std::forward<TArgs>(aArgs)... }, myHead
-	};
+		Node* node = new Node { T{ std::forward<TArgs>(aArgs)... }, myHead };
 		myHead = node;
 	}
 
 	template <typename T>
-	void LinkedList<T>::Clear()
+	void LinkedList<T>::Clear() noexcept
 	{
 		Node* currentNode = myHead;
 		while (currentNode)
@@ -104,5 +138,34 @@ namespace QPA
 			delete currentNode;
 			currentNode = nextNode;
 		}
+	}
+
+	template <typename T>
+	bool LinkedList<T>::Empty() const
+	{
+		return static_cast<bool>(myHead);
+	}
+
+	template <typename T>
+	void LinkedList<T>::Swap(LinkedList<T>& aOther) noexcept
+	{
+		T* tempHead = aOther.myHead;
+		aOther.myHead = myHead;
+		myHead = tempHead;
+	}
+
+	template <typename T>
+	void LinkedList<T>::Reverse() noexcept
+	{
+		Node* current = myHead;
+		Node* previous = nullptr;
+		while(current)
+		{
+			Node* next = current->myNext;
+			current->myNext = previous;
+			previous = current;
+			current = next;
+		}
+		myHead = previous;
 	}
 }
