@@ -11,44 +11,44 @@ namespace QPA
 	{
 		using Ref = T&;
 		using ConstRef = const T&;
-		struct Node
-		{
-			friend class LinkedList<T>;
-			friend struct Iterator;
-
-			T Data;
-
-			Node() = delete;
-
-			private:
-				Node(ConstRef aData, Node* aNext)
-					: Data(aData), myNext(aNext) {}
-				Node* myNext { nullptr };
-		};
-
-		struct Iterator
-		{
-			using iterator_category = std::forward_iterator_tag;
-			using difference_type = std::ptrdiff_t;
-			using value_type = Node;
-			using pointer = Node*;
-			using reference = Node&;
-
-			Iterator(pointer aPtr)
-				: myPtr(aPtr) {}
-
-			reference operator*() const { return *myPtr; }
-			pointer operator->() { return myPtr; }
-			Iterator& operator++() { myPtr = myPtr->myNext; return *this; }
-			Iterator operator++(int) { Iterator prevValue = *this; myPtr = myPtr->myNext; return prevValue; }
-
-			friend bool operator==(const Iterator& aFirst, const Iterator& aSecond) { return aFirst.myPtr == aSecond.myPtr; }
-			friend bool operator!=(const Iterator& aFirst, const Iterator& aSecond) { return aFirst.myPtr != aSecond.myPtr; }
-			private:
-				pointer myPtr;
-		};
-
 		public:
+			struct Node
+			{
+				friend class LinkedList<T>;
+				friend struct Iterator;
+
+				T Data;
+
+				Node() = delete;
+
+				private:
+					Node(ConstRef aData, Node* aNext)
+						: Data(aData), myNext(aNext) {}
+					Node* myNext { nullptr };
+			};
+
+			struct Iterator
+			{
+				using iterator_category = std::forward_iterator_tag;
+				using difference_type = std::ptrdiff_t;
+				using value_type = Node;
+				using pointer = Node*;
+				using reference = Node&;
+
+				Iterator(pointer aPtr)
+					: myPtr(aPtr) {}
+
+				reference operator*() const { return *myPtr; }
+				pointer operator->() { return myPtr; }
+				Iterator& operator++() { myPtr = myPtr->myNext; return *this; }
+				Iterator operator++(int) { Iterator prevValue = *this; myPtr = myPtr->myNext; return prevValue; }
+
+				friend bool operator==(const Iterator& aFirst, const Iterator& aSecond) { return aFirst.myPtr == aSecond.myPtr; }
+				friend bool operator!=(const Iterator& aFirst, const Iterator& aSecond) { return aFirst.myPtr != aSecond.myPtr; }
+				private:
+					pointer myPtr;
+			};
+
 			LinkedList() = default;
 			LinkedList(std::initializer_list<T> aList);
 			~LinkedList();
