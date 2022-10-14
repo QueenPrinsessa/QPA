@@ -10,8 +10,17 @@ namespace QPA
 	{
 		struct Node
 		{
+			friend class LinkedList<T>;
+			friend struct Iterator;
+
 			T Data;
-			Node* Next { nullptr };
+
+			Node() = delete;
+
+			private:
+				Node(const T& aData, Node* aNext)
+					: Data(aData), myNext(aNext) {}
+				Node* myNext { nullptr };
 		};
 
 		struct Iterator
@@ -27,8 +36,8 @@ namespace QPA
 
 			reference operator*() const { return *myPtr; }
 			pointer operator->() { return myPtr; }
-			Iterator& operator++() { myPtr = myPtr->Next; return *this; }
-			Iterator operator++(int) { Iterator prevValue = *this; myPtr = myPtr->Next; return prevValue; }
+			Iterator& operator++() { myPtr = myPtr->myNext; return *this; }
+			Iterator operator++(int) { Iterator prevValue = *this; myPtr = myPtr->myNext; return prevValue; }
 
 			friend bool operator==(const Iterator& aFirst, const Iterator& aSecond) { return aFirst.myPtr == aSecond.myPtr; }
 			friend bool operator!=(const Iterator& aFirst, const Iterator& aSecond) { return aFirst.myPtr != aSecond.myPtr; }
@@ -41,12 +50,10 @@ namespace QPA
 			LinkedList(std::initializer_list<T> aList);
 			~LinkedList();
 
-			const Node* Head() { return myHead; }
-
-			void Push(const T& aData);
+			void PushFront(const T& aData);
 
 			template<typename ... TArgs>
-			void Emplace(TArgs&&... aArgs);
+			void EmplaceFront(TArgs&&... aArgs);
 
 			void Clear();
 
@@ -61,7 +68,7 @@ namespace QPA
 	{
 		for(auto it = std::rbegin(aList); it != std::rend(aList); ++it)
 		{
-			Push(*it);
+			PushFront(*it);
 		}
 	}
 
@@ -72,7 +79,7 @@ namespace QPA
 	}
 
 	template <typename T>
-	void LinkedList<T>::Push(const T& aData)
+	void LinkedList<T>::PushFront(const T& aData)
 	{
 		Node* node = new Node { aData, myHead };
 		myHead = node;
@@ -80,9 +87,10 @@ namespace QPA
 
 	template <typename T>
 	template <typename ... TArgs>
-	void LinkedList<T>::Emplace(TArgs&&... aArgs)
+	void LinkedList<T>::EmplaceFront(TArgs&&... aArgs)
 	{
-		Node* node = new Node { std::move(T(std::forward<TArgs>(aArgs)...)), myHead };
+		Node* node = new Node { T{ std::forward<TArgs>(aArgs)... }, myHead
+	};
 		myHead = node;
 	}
 
@@ -92,7 +100,7 @@ namespace QPA
 		Node* currentNode = myHead;
 		while (currentNode)
 		{
-			Node* nextNode = currentNode->Next;
+			Node* nextNode = currentNode->myNext;
 			delete currentNode;
 			currentNode = nextNode;
 		}
