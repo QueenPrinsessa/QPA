@@ -10,7 +10,14 @@ int main()
 		int x;
 		int y;
 
-		Test(const Test&) = default;
+		Test(const Test& aOther)
+		{
+			x = aOther.x;
+			y = aOther.y;
+			static int copyCalls = 0;
+			copyCalls++;
+			printf("Copy constructor calls: %d\n", copyCalls);
+		}
 
 		Test(int aX, int aY)
 		{
@@ -18,13 +25,13 @@ int main()
 			y = aY;
 			static int constructorCalls = 0;
 			constructorCalls++;
-			printf("Constructor Calls: %d\n", constructorCalls);
+			printf("Constructor calls: %d\n", constructorCalls);
 		}
 		~Test()
 		{
 			static int deconstructorCalls = 0;
 			deconstructorCalls++;
-			printf("Deconstructor Calls: %d\n", deconstructorCalls);
+			printf("Deconstructor calls: %d\n", deconstructorCalls);
 		}
 	};
 
@@ -57,6 +64,13 @@ int main()
 	list3.PushFront(Test{9, 3});
 	list3.PushFront(Test { 1, 9 });
 
+	for (const auto& node : list3)
+	{
+		printf("x: %d y: %d\n", node.Data.x, node.Data.y);
+	}
+
+	printf("--------Test 4---------\n");
+	list3.Reverse();
 	for (const auto& node : list3)
 	{
 		printf("x: %d y: %d\n", node.Data.x, node.Data.y);
