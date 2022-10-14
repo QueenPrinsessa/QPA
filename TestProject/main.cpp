@@ -7,8 +7,8 @@ int main()
 
 	struct Test
 	{
-		int x;
-		int y;
+		int x { 0 };
+		int y { 0 };
 
 		Test(const Test& aOther)
 		{
@@ -75,5 +75,6 @@ int main()
 	{
 		printf("x: %d y: %d\n", node.Data.x, node.Data.y);
 	}
+
 	return EXIT_SUCCESS;
 }
