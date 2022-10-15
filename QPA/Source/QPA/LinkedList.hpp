@@ -1,4 +1,5 @@
 #pragma once
+#include "Types.h"
 #include <cassert>
 #include <utility>
 #include <iterator>
@@ -9,6 +10,7 @@ namespace QPA
 	template <typename T>
 	class LinkedList
 	{
+		using Value = T;
 		using Ref = T&;
 		using ConstRef = const T&;
 		public:
@@ -22,8 +24,10 @@ namespace QPA
 				Node() = delete;
 
 				private:
-					Node(ConstRef aData, Node* aNext)
-						: Data(aData), myNext(aNext) {}
+					template <typename ... TArgs>
+					Node(Node* aNext, TArgs&&... aArgs)
+						: Data(std::forward<TArgs>(aArgs)...), myNext(aNext) {}
+
 					Node* myNext { nullptr };
 			};
 
@@ -55,23 +59,27 @@ namespace QPA
 
 			Ref Front();
 			ConstRef Front() const;
+			Value FrontThenPop();
 
 			void PushFront(const T& aData);
 			void PopFront();
 
 			template<typename ... TArgs>
-			void EmplaceFront(TArgs&&... aArgs);
-
+			Ref EmplaceFront(TArgs&&... aArgs);
+			
 			void Clear() noexcept;
 			bool Empty() const;
 
 			void Swap(LinkedList<T>& aOther) noexcept;
 			void Reverse() noexcept;
 
+			u64 Size() const;
+
 			Iterator begin() { return Iterator { myHead }; }
 			Iterator end() { return Iterator { nullptr }; }
 		private:
 			Node* myHead { nullptr };
+			u64 mySize { 0 };
 	};
 
 	template <typename T>
@@ -90,23 +98,30 @@ namespace QPA
 	}
 
 	template <typename T>
-	T& LinkedList<T>::Front()
+	typename LinkedList<T>::Ref LinkedList<T>::Front()
 	{
 		assert(myHead && "Accessing nullptr element");
 		return myHead->Data;
 	}
 
 	template <typename T>
-	const T& LinkedList<T>::Front() const
+	typename LinkedList<T>::ConstRef LinkedList<T>::Front() const
 	{
 		return Front();
 	}
 
 	template <typename T>
+	typename LinkedList<T>::Value LinkedList<T>::FrontThenPop()
+	{
+		Value value = Front();
+		PopFront();
+		return value;
+	}
+
+	template <typename T>
 	void LinkedList<T>::PushFront(const T& aData)
 	{
-		Node* node = new Node { aData, myHead };
-		myHead = node;
+		EmplaceFront(aData);
 	}
 
 	template <typename T>
@@ -117,15 +132,18 @@ namespace QPA
 			Node* next = myHead->myNext;
 			delete myHead;
 			myHead = next;
+			--mySize;
 		}
 	}
 
 	template <typename T>
 	template <typename ... TArgs>
-	void LinkedList<T>::EmplaceFront(TArgs&&... aArgs)
+	typename LinkedList<T>::Ref LinkedList<T>::EmplaceFront(TArgs&&... aArgs)
 	{
-		Node* node = new Node { T{ std::forward<TArgs>(aArgs)... }, myHead };
+		Node* node = new Node { myHead, std::forward<TArgs>(aArgs)... };
 		myHead = node;
+		++mySize;
+		return myHead->Data;
 	}
 
 	template <typename T>
@@ -143,7 +161,7 @@ namespace QPA
 	template <typename T>
 	bool LinkedList<T>::Empty() const
 	{
-		return static_cast<bool>(myHead);
+		return mySize == 0;
 	}
 
 	template <typename T>
@@ -167,5 +185,11 @@ namespace QPA
 			current = next;
 		}
 		myHead = previous;
+	}
+
+	template <typename T>
+	u64 LinkedList<T>::Size() const
+	{
+		return mySize;
 	}
 }
